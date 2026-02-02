@@ -310,9 +310,6 @@ void kernel_main(void)
 
     /* Set up rest of important stuff. */
 
-    for (size_t p = 0; p < 150; p++){
-        terminal_writestring("TEST\n");
-    }
 
     if(succesfully_booted == 1){
         terminal_writestring("OverFlowOS has Booted.\n");
