@@ -1,8 +1,12 @@
 #!/bin/bash
 
-i686-elf-as boot.s -o ../build/boot.o
-i686-elf-gcc -c kernel.c -o ../build/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-i686-elf-gcc -T linker.ld -o ../build/OverFlowOS -ffreestanding -O2 -nostdlib \
+BOOT_L="kernel/arch/i386/boot.s"
+KERNEL_L="kernel/kernel/kernel.c"
+LINKER_L="kernel/arch/i386/linker.ld"
+
+i686-elf-as ${BOOT_L} -o ../build/boot.o
+i686-elf-gcc -c ${KERNEL_L} -o ../build/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+i686-elf-gcc -T ${LINKER_L} -o ../build/OverFlowOS -ffreestanding -O2 -nostdlib \
     ../build/boot.o ../build/kernel.o -lgcc
 
 cd ..
