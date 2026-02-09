@@ -1,7 +1,3 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
 #include <kernel/tty.h>
 #include "vga.h"
 static const size_t VGA_WIDTH = 80;
@@ -30,6 +26,36 @@ void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
     const size_t index = y * VGA_WIDTH + x;
     terminal_buffer[index] = vga_entry(c, color);
 }
+size_t strlen(const char* str)
+{
+    size_t len = 0;
+    while (str[len])
+        len++;
+    return len;
+}
+void terminal_scroll(void)
+{
+    //////////////////
+    // Needs major fix
+    /////////////////
+    for(size_t y = 0; y < VGA_HEIGHT; y++){
+        for(size_t x = 0; x < VGA_WIDTH; x++){
+            // Hopefully this works, it should just copy over the characters
+            const size_t src_index = y * VGA_WIDTH + x;
+            const size_t dest_index = (y-1) * VGA_WIDTH + x;
+            terminal_buffer[dest_index] = terminal_buffer[src_index];
+        }
+    }
+
+    // Clear it?
+    const uint16_t blank = vga_entry(' ', terminal_color);
+    for (size_t x = 0; x < VGA_WIDTH; x++){
+        terminal_buffer[(VGA_HEIGHT - 1) * VGA_WIDTH + x] = blank;
+    }
+
+    // Check the cursor and go up
+    terminal_row = VGA_HEIGHT - 1;
+}
 void terminal_putchar(char c) {
     unsigned char uc = c;
     terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
@@ -39,9 +65,21 @@ void terminal_putchar(char c) {
             terminal_row = 0;
     }
 }
-void terminal_write(const char* data, size_t size) {
+void terminal_write(const char* data, size_t size)
+{
     for (size_t i = 0; i < size; i++)
-        terminal_putchar(data[i]);
+        if(data[i] == '\n'){
+            if (terminal_row+1 != VGA_HEIGHT){
+                terminal_row += 1;
+                terminal_column = 0;
+            } else {
+                terminal_scroll();
+                terminal_column = 0;
+            }
+        }
+        else {
+            terminal_putchar(data[i]);
+        }
 }
 void terminal_writestring(const char* data) {
     terminal_write(data, strlen(data));
