@@ -15,7 +15,7 @@ void kernel_main(void)
     terminal_writestring("OverFlowOS Booting!\n");
     print_logo();
     kprint("System online in %i.", 10);
-    for (;;)
+    while 1
     {
         asm volatile("hlt");
     }
